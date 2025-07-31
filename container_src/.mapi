@@ -1,0 +1,18 @@
+#
+# Example .mapi configuration file
+#
+version: "1.0"
+
+...
+
+# You can specify different groups with different combinations of hints
+# resource_hints:
+# - name: Group Name A
+#   hints:
+#   - "username:foo"
+#   - "group:bar"
+# - name: Group Name B
+#   hints:
+#   - "username:baz"
+#   - "group:group-A"
+#   - "group:group-B" # You can also specify the same regular expression with different values

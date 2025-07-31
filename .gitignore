@@ -1,0 +1,4 @@
+.vscode/
+.wrangler
+node_modules/
+dist/
