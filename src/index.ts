@@ -1,4 +1,4 @@
-import { Container } from "@cloudflare/containers";
+import { Container, getContainer } from "@cloudflare/containers";
 import { Hono } from "hono";
 
 export interface Env {
@@ -14,8 +14,8 @@ export class MapiContainer extends Container<Env> {
   // Environment variables passed to the container
   envVars = {
     // MESSAGE: "I was passed in via the container class!",
-    MAYHEM_URL: "https://app.mayhem.security",
-    MAYHEM_TOKEN: "placeholder-token",
+    // MAYHEM_URL: "https://app.mayhem.security",
+    MAYHEM_TOKEN: "fill in your token here",
   };
 
   // Optional lifecycle hooks
@@ -65,20 +65,21 @@ app.post("/run", async (c) => {
     return c.html("<h2>All fields are required!</h2><a href='/'>Back</a>");
   }
 
-  const response = await fetch(`http://localhost:8080/run`, {
-    method: 'POST',
+  const container = getContainer(c.env.MAPI_CONTAINER);
+  return await container.fetch(c.req.raw, {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: new URLSearchParams(
-      Object.fromEntries(
-        Object.entries(body).map(([k, v]) => [k, typeof v === "string" ? v : ""])
-      )
-    ).toString(),
+    body: new URLSearchParams({
+      workspace,
+      project,
+      target,
+      api_url,
+      api_spec,
+      duration,
+    }),
   });
-
-  const result = await response.text();
-  return c.html(result);
 });
 
 export default app;
