@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"os"
+	"strings"
 )
 
 func runMapi(w http.ResponseWriter, r *http.Request) {
@@ -13,22 +15,37 @@ func runMapi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workspace := r.FormValue("workspace")
-	project := r.FormValue("project")
-	target := r.FormValue("target")
-	api_url := r.FormValue("api_url")
-	api_spec := r.FormValue("api_spec")
-	duration := r.FormValue("duration")
+	// fetch data and strip whitespace
+	workspace := strings.TrimSpace(r.FormValue("workspace"))
+	project := strings.TrimSpace(r.FormValue("project"))
+	target := strings.TrimSpace(r.FormValue("target"))
+	api_url := strings.TrimSpace(r.FormValue("api_url"))
+	api_spec := strings.TrimSpace(r.FormValue("api_spec"))
+	duration := strings.TrimSpace(r.FormValue("duration"))
 
 	if workspace == "" || project == "" || target == "" || api_url == "" || api_spec == "" || duration == "" {
 		http.Error(w, "All fields are required!", http.StatusBadRequest)
 		return
 	}
 
-	cmd := exec.Command("mapi", "run", fmt.Sprintf("%s/%s/%s %s %s --url %s", workspace, project, target, duration, api_spec, api_url))
+	// Need to run /usr/local/bin/mapi run workspace/project/target duration api_spec --url api_url
+	cmd := exec.Command("/usr/local/bin/mapi", "run", fmt.Sprintf("%s/%s/%s", workspace, project, target), duration, api_spec, "--url", api_url)
+
+	// join full command into a single variable
+	fullCommand := fmt.Sprintf("mapi run %s/%s/%s %s %s --url %s", workspace, project, target, duration, api_spec, api_url)
+
+	// // Get the string value of the environment variable MAYHEM_TOKEN
+	// // if it exists otherwise use an empty string
+	// Note: this is all probably unnecessary, but helped with debugging
+	mayhemToken := ""
+	if token := os.Getenv("MAYHEM_TOKEN"); token != "" {
+		mayhemToken = token
+	}
+	cmd.Env = append(cmd.Env, fmt.Sprintf("MAYHEM_TOKEN=%s", mayhemToken))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to execute command: %s", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Token: %s\nCommand: %s\nFailed with: %s\nError: %s", mayhemToken, fullCommand, string(output), err), http.StatusInternalServerError)
 		return
 	}
 
