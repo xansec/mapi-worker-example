@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	"os"
 	"strings"
 )
 
@@ -23,29 +22,48 @@ func runMapi(w http.ResponseWriter, r *http.Request) {
 	api_spec := strings.TrimSpace(r.FormValue("api_spec"))
 	duration := strings.TrimSpace(r.FormValue("duration"))
 
+	addl_opts := []string{}
+	if r.FormValue("experimental") == "1" {
+		addl_opts = append(addl_opts, "--experimental-rules")
+	}
+	if r.FormValue("verify") == "1" {
+		addl_opts = append(addl_opts, "--verify-tls")
+	}
+	authType := strings.TrimSpace(r.FormValue("auth-type"))
+	if authType == "None" {
+		// do nothing
+	} else {
+		authValue := strings.TrimSpace(r.FormValue("auth-value"))
+		if authValue == "" {
+			http.Error(w, "Auth value is required for header authentication", http.StatusBadRequest)
+			return
+		}
+		switch authType {
+		case "Bearer", "Basic":
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("Authorization: %s %s", authType, authValue))
+		case "Cookie":
+			addl_opts = append(addl_opts, "--cookie-auth", fmt.Sprintf("%s", authValue))
+		}
+	}
+
 	if workspace == "" || project == "" || target == "" || api_url == "" || api_spec == "" || duration == "" {
-		http.Error(w, "All fields are required!", http.StatusBadRequest)
+		http.Error(w, "Some fields are missing!", http.StatusBadRequest)
 		return
 	}
 
 	// Need to run /usr/local/bin/mapi run workspace/project/target duration api_spec --url api_url
-	cmd := exec.Command("/usr/local/bin/mapi", "run", fmt.Sprintf("%s/%s/%s", workspace, project, target), duration, api_spec, "--url", api_url)
+	cmd_array := []string{"run", fmt.Sprintf("%s/%s/%s", workspace, project, target), duration, api_spec, "--url", api_url}
+	if len(addl_opts) > 0 {
+		cmd_array = append(cmd_array, addl_opts...)
+	}
+	cmd := exec.Command("/usr/local/bin/mapi", cmd_array...)
 
 	// join full command into a single variable
-	fullCommand := fmt.Sprintf("mapi run %s/%s/%s %s %s --url %s", workspace, project, target, duration, api_spec, api_url)
-
-	// // Get the string value of the environment variable MAYHEM_TOKEN
-	// // if it exists otherwise use an empty string
-	// Note: this is all probably unnecessary, but helped with debugging
-	mayhemToken := ""
-	if token := os.Getenv("MAYHEM_TOKEN"); token != "" {
-		mayhemToken = token
-	}
-	cmd.Env = append(cmd.Env, fmt.Sprintf("MAYHEM_TOKEN=%s", mayhemToken))
+	fullCommand := fmt.Sprintf("mapi %s", strings.Join(cmd_array, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Token: %s\nCommand: %s\nFailed with: %s\nError: %s", mayhemToken, fullCommand, string(output), err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Command: %s\nFailed with: %s\nError: %s", fullCommand, string(output), err), http.StatusInternalServerError)
 		return
 	}
 

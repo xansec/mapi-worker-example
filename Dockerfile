@@ -17,6 +17,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
 FROM forallsecure/mapi:latest AS prod
 
+# This can be removed in the future when the mapi image is updated
+RUN wget https://app.mayhem.security/cli/mapi/linux-musl/latest/mapi && chmod +x ./mapi
+RUN install ./mapi /usr/local/bin/ && rm ./mapi
+
 COPY --from=build /server /server
 
 # Run
