@@ -13,6 +13,9 @@
 	"observability": {
 		"enabled": true
 	},
+	"assets": {
+		"directory": "./public",
+	},
 	"containers": [
 		{
 			"class_name": "MapiContainer",
