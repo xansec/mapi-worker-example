@@ -22,6 +22,7 @@ RUN wget https://app.mayhem.security/cli/mapi/linux-musl/latest/mapi && chmod +x
 RUN install ./mapi /usr/local/bin/ && rm ./mapi
 
 COPY --from=build /server /server
+COPY container_src/endpoints.txt /endpoints.txt
 
 # Run
 CMD ["/server"]

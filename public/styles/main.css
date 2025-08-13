@@ -27,7 +27,7 @@ label {
     margin-bottom: 0.7rem;
     font-size: 1rem;
 }
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"], input[type="password"] {
     width: 100%;
     padding: 0.5rem;
     margin-top: 0.2rem;
@@ -65,7 +65,7 @@ button:hover {
     margin-top: 1.5rem;
 }
 
-.additional-summary {
+summary {
     font-weight: 500;
     color: #CBD0FF;
     cursor: pointer;
@@ -73,15 +73,14 @@ button:hover {
     margin-bottom: 1rem;
 }
 
-.additional-fieldset {
+fieldset {
     border: 1px solid #6A72C7;
     border-radius: 8px;
     padding: 1rem;
     margin-top: 1rem;
 }
 
-.auth-select,
-.auth-input {
+select {
     width: 100%;
     padding: 0.5rem;
     border-radius: 6px;
@@ -89,4 +88,11 @@ button:hover {
     color: #CBD0FF;
     font-size: 1rem;
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    margin-bottom: 1rem;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5rem;
+    vertical-align: middle;
 }
