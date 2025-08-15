@@ -21,12 +21,15 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	addl_opts := []string{}
+
 	// Strip https:// or http:// from the URL
 	prefixes := []string{"https://", "http://"}
 	postfixes := []string{"/", "/v1", "/v2", "/v3", "/api", "/api/v1", "/api/v2", "/api/v3"}
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(api_url, prefix) {
 			api_url = strings.TrimPrefix(api_url, prefix)
+			addl_opts = append(addl_opts, "--schemes", strings.TrimSuffix(prefix, "://"))
 			break
 		}
 	}
@@ -36,7 +39,10 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	cmd_array := []string{"discover", "--domains", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
+	cmd_array := []string{"discover", "--hosts", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
+	if len(addl_opts) > 0 {
+		cmd_array = append(cmd_array, addl_opts...)
+	}
 	cmd := exec.Command("/usr/local/bin/mapi", cmd_array...)
 
 	fullCommand := fmt.Sprintf("mapi %s", strings.Join(cmd_array, " "))
@@ -50,7 +56,7 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<html><body><h2>Command executed successfully!</h2><pre>%s</pre><a href='/'>Back</a></body></html>", output)
 
 	// List contents of /discovery_results
-	results, err := exec.Command("ls", "-l", "/discovery_results").CombinedOutput()
+	results, err := exec.Command("readlink", "-f", "/discovery_results/*").CombinedOutput()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to list discovery results: %s", err), http.StatusInternalServerError)
 		return
