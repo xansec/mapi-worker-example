@@ -22,6 +22,14 @@ h2 {
     font-weight: 600;
     letter-spacing: 1px;
 }
+a{
+    color: #717fff;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+a:hover, a:focus {
+  text-decoration: none;
+}
 label {
     display: block;
     margin-bottom: 0.7rem;
@@ -64,7 +72,6 @@ button:hover {
 .additional-options {
     margin-top: 1.5rem;
 }
-
 summary {
     font-weight: 500;
     color: #CBD0FF;
@@ -72,14 +79,12 @@ summary {
     font-size: 1.1rem;
     margin-bottom: 1rem;
 }
-
 fieldset {
     border: 1px solid #6A72C7;
     border-radius: 8px;
     padding: 1rem;
     margin-top: 1rem;
 }
-
 select {
     width: 100%;
     padding: 0.5rem;
@@ -90,17 +95,34 @@ select {
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     margin-bottom: 1rem;
 }
-
 input[type="checkbox"] {
     width: auto;
     margin-right: 0.5rem;
     vertical-align: middle;
 }
-
 span {
     font-size: 0.8em; 
     display: block; 
     margin-top: 4px;
     font-weight: lighter;
     text-align: right;
+}
+.terminal-container {
+  margin-top: 20px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  overflow: hidden;
+  width: calc(100vw - 100px);
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.terminal {
+  background: #1a1a1a;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
 }

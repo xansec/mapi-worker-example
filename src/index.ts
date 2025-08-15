@@ -44,11 +44,11 @@ app.post("/discover", async (c) => {
   const body = await c.req.parseBody();
   const { api_url } = body;
   if (!api_url) {
-    return c.html("<h2>API URL is missing!</h2><a href='/'>Back</a>");
+    return c.text("API URL is missing!", 400);
   }
 
   const container = getContainer(c.env.MAPI_CONTAINER);
-  return await container.fetch(c.req.raw, {
+  const response = await container.fetch(c.req.raw, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -56,6 +56,9 @@ app.post("/discover", async (c) => {
     body: new URLSearchParams({
       api_url: toStringIfFile(api_url),
     }),
+  });
+  return new Response(response.body, {
+    headers: { "Content-Type": "text/plain" },
   });
 });
 
@@ -72,11 +75,11 @@ app.post("/run", async (c) => {
           "auth-type": authType,
           "auth-value": authValue } = body;
   if (!workspace || !project || !target || !api_url || !api_spec) {
-    return c.html("<h2>Some fields are missing!</h2><a href='/'>Back</a>");
+    return c.text("Some fields are missing!", 400);
   }
 
   const container = getContainer(c.env.MAPI_CONTAINER);
-  return await container.fetch(c.req.raw, {
+  const response = await container.fetch(c.req.raw, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -93,6 +96,9 @@ app.post("/run", async (c) => {
       "auth-type": toStringIfFile(authType),
       "auth-value": toStringIfFile(authValue),
     }),
+  });
+  return new Response(response.body, {
+    headers: { "Content-Type": "text/plain" },
   });
 });
 

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net/http"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func mapiDiscover(w http.ResponseWriter, r *http.Request) {
@@ -39,30 +41,22 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	cmd_array := []string{"discover", "--hosts", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
+	cmd_array := []string{"--verbosity", "debug", "discover", "--hosts", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
 	if len(addl_opts) > 0 {
 		cmd_array = append(cmd_array, addl_opts...)
 	}
+
 	cmd := exec.Command("/usr/local/bin/mapi", cmd_array...)
-
 	fullCommand := fmt.Sprintf("mapi %s", strings.Join(cmd_array, " "))
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Command: %s\nFailed with: %s\nError: %s", fullCommand, string(output), err), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintf(w, "<html><body><h2>Command executed successfully!</h2><pre>%s</pre><a href='/'>Back</a></body></html>", output)
+	streamCommandToTerminal(w, cmd, fullCommand)
 
 	// List contents of /discovery_results
-	results, err := exec.Command("readlink", "-f", "/discovery_results/*").CombinedOutput()
+	results, err := exec.Command("find", "/discovery_results/").CombinedOutput()
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to list discovery results: %s", err), http.StatusInternalServerError)
-		return
+		fmt.Fprintf(w, "\nFailed to list discovery results: %s\n", err)
+	} else {
+		fmt.Fprintf(w, "\nDiscovery Results:\n%s\n", results)
 	}
-	fmt.Fprintf(w, "<h3>Discovery Results:</h3><pre>%s</pre>", results)
-
 }
 
 func mapiRun(w http.ResponseWriter, r *http.Request) {
@@ -114,17 +108,47 @@ func mapiRun(w http.ResponseWriter, r *http.Request) {
 		cmd_array = append(cmd_array, addl_opts...)
 	}
 	cmd := exec.Command("/usr/local/bin/mapi", cmd_array...)
-
-	// join full command into a single variable
 	fullCommand := fmt.Sprintf("mapi %s", strings.Join(cmd_array, " "))
 
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Command: %s\nFailed with: %s\nError: %s", fullCommand, string(output), err), http.StatusInternalServerError)
-		return
+	streamCommandToTerminal(w, cmd, fullCommand)
+}
+
+func streamCommandToTerminal(w http.ResponseWriter, cmd *exec.Cmd, fullCommand string) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	fmt.Fprintf(w, "> %s\n\n", fullCommand)
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
 	}
 
-	fmt.Fprintf(w, "<html><body><h2>Command executed successfully!</h2><pre>%s</pre><a href='/'>Back</a></body></html>", output)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	cmd.Start()
+
+	// Stream output in real-time
+	scannerOut := bufio.NewScanner(stdout)
+	scannerErr := bufio.NewScanner(stderr)
+	for scannerOut.Scan() {
+		fmt.Fprintf(w, "%s\n", scannerOut.Text())
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	for scannerErr.Scan() {
+		fmt.Fprintf(w, "%s\n", scannerErr.Text())
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	cmd.Wait()
+
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
+	}
 }
 
 func main() {

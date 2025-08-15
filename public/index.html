@@ -1,54 +1,67 @@
 <html>
-      <head>
-        <title>Mayhem API Scan</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="styles/main.css" />
-      </head>
-      <body>
-        <img src="images/mayhem-logo.png" alt="Logo" class="logo" />
-        <div class="container">
-          <h2>Unleash Mayhem!</h2>
-          
-          <!-- mapi discover -->
-          <form method="POST" action="/discover">
-            <label>Enter your API URL: <input type="text" id="api_url" name="api_url" required /></label>
-            <button type="submit" class="discover-button">Discover API Endpoints</button>
-          </form>
-          
-          <br/><br/>
-          
-          <!-- mapi run -->
-          <details class="start-scan">
-            <summary class="start-summary">
-              Or, Configure your Mayhem Scan<br>
-              <span>(if you already have an API spec)</span>
-            </summary>
-            <form method="POST" action="/run">
-              <label>Workspace: <input type="text" name="workspace" required /></label>
-              <label>Project: <input type="text" name="project" required /></label>
-              <label>Target: <input type="text" name="target" required /></label>
-              <label>API URL: <input type="text" name="api_url" required /></label>
-              <label>API Specification: <input type="text" name="api_spec" required /></label>
-              <label>Duration: <input type="text" name="duration" value="auto" /></label>
-              <details>
-                <summary>Additional Options</summary>
-                <fieldset>
-                  <label><input type="checkbox" name="experimental" value="1" /> Experimental Rules</label>
-                  <label><input type="checkbox" name="verify" value="1" /> Verify TLS</label>
-                  <label for="auth-type">Authentication Header Type:</label>
-                  <select name="auth-type" id="auth-type">
-                    <option value="None">None</option>
-                    <option value="Basic">Basic</option>
-                    <option value="Bearer">Bearer</option>
-                    <option value="Cookie">Cookie</option>
-                  </select>
-                  <label for="auth-value">Authentication Value:</label>
-                  <input type="password" name="auth-value" id="auth-value" />
-                </fieldset>
-              </details>
-              <button type="submit">Run</button>
-            </form>
+  <head>
+    <title>Mayhem API Scan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles/main.css" />
+  </head>
+  <body>
+    <a href="https://mayhem.security/" target="_blank">
+      <img src="images/mayhem-logo.png" alt="Logo" class="logo" href="https://mayhem.security/"/>
+    </a>
+    <div class="container">
+      <h2>Unleash Mayhem!</h2>
+
+      <!-- mapi discover -->
+      <form id="discover-form" onsubmit="event.preventDefault(); handleDiscover();">
+        <label>Enter your API URL: <input type="text" id="api_url" name="api_url" required /></label>
+        <button type="submit" class="discover-button">Discover API Endpoints</button>
+      </form>
+
+      <br/><br/>
+
+      <!-- mapi run -->
+      <details class="start-scan">
+        <summary class="start-summary">
+          Or, Configure your Mayhem Scan<br>
+          <span>(if you already have an API spec)</span>
+        </summary>
+        <form id="run-form" onsubmit="event.preventDefault(); handleRun();">
+          <label>Workspace: <input type="text" name="workspace" required /></label>
+          <label>Project: <input type="text" name="project" required /></label>
+          <label>Target: <input type="text" name="target" required /></label>
+          <label>API URL: <input type="text" name="api_url" required /></label>
+          <label>API Specification: <input type="text" name="api_spec" required /></label>
+          <label>Duration: <input type="text" name="duration" value="auto" /></label>
+          <details>
+            <summary>Additional Options</summary>
+            <fieldset>
+              <label><input type="checkbox" name="experimental" value="1" /> Experimental Rules</label>
+              <label><input type="checkbox" name="verify" value="1" /> Verify TLS</label>
+              <label for="auth-type">Authentication Header Type:</label>
+              <select name="auth-type" id="auth-type">
+                <option value="None">None</option>
+                <option value="Basic">Basic</option>
+                <option value="Bearer">Bearer</option>
+                <option value="Cookie">Cookie</option>
+              </select>
+              <label for="auth-value">Authentication Value:</label>
+              <input type="password" name="auth-value" id="auth-value" />
+            </fieldset>
           </details>
-        </div>
-      </body>
-    </html>
+          <button type="submit">Run Mayhem</button>
+        </form>
+      </details>
+
+      <!-- Terminal Output Container -->
+    </div>
+    <div class="terminal-container">
+      <div id="terminal" class="terminal"></div>
+    </div>
+    <br/><br/>
+    <footer>
+      <p>Powered by <a href="https://mayhem.security" target="_blank">Mayhem</a></p>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+  </body>
+</html>
