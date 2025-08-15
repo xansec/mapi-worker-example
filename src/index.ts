@@ -11,8 +11,7 @@ export class MapiContainer extends Container<Env> {
   sleepAfter = "5m";
   // Use Cloudflare Worker secrets from the environment
   envVars = {
-    MAYHEM_URL: this.env.MAYHEM_URL, // Default URL; change if needed
-    // MAYHEM_TOKEN: "set your mayhem token here", // Ensure your worker has this secret set
+    MAYHEM_URL: this.env.MAYHEM_URL, // Ensure your worker has this secret set
     MAYHEM_TOKEN: this.env.MAYHEM_TOKEN, // Ensure your worker has this secret set
     // You can add other env vars here as needed
   };
@@ -35,6 +34,31 @@ const app = new Hono<{
   Bindings: Env;
 }>();
 
+function toStringIfFile(val: unknown): string {
+    if (typeof val === "string") return val;
+    if (val instanceof File) return val.name;
+    return "";
+  }
+
+app.post("/discover", async (c) => {
+  const body = await c.req.parseBody();
+  const { api_url } = body;
+  if (!api_url) {
+    return c.html("<h2>API URL is missing!</h2><a href='/'>Back</a>");
+  }
+
+  const container = getContainer(c.env.MAPI_CONTAINER);
+  return await container.fetch(c.req.raw, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      api_url: toStringIfFile(api_url),
+    }),
+  });
+});
+
 app.post("/run", async (c) => {
   const body = await c.req.parseBody();
   const { workspace, 
@@ -49,13 +73,6 @@ app.post("/run", async (c) => {
           "auth-value": authValue } = body;
   if (!workspace || !project || !target || !api_url || !api_spec) {
     return c.html("<h2>Some fields are missing!</h2><a href='/'>Back</a>");
-  }
-
-  // Ensure all values are strings (not File objects)
-  function toStringIfFile(val: unknown): string {
-    if (typeof val === "string") return val;
-    if (val instanceof File) return val.name;
-    return "";
   }
 
   const container = getContainer(c.env.MAPI_CONTAINER);

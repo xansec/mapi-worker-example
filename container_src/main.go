@@ -8,7 +8,58 @@ import (
 	"strings"
 )
 
-func runMapi(w http.ResponseWriter, r *http.Request) {
+func mapiDiscover(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	api_url := strings.TrimSpace(r.FormValue("api_url"))
+
+	if api_url == "" {
+		http.Error(w, "API URL is required", http.StatusBadRequest)
+		return
+	}
+
+	// Strip https:// or http:// from the URL
+	prefixes := []string{"https://", "http://"}
+	postfixes := []string{"/", "/v1", "/v2", "/v3", "/api", "/api/v1", "/api/v2", "/api/v3"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(api_url, prefix) {
+			api_url = strings.TrimPrefix(api_url, prefix)
+			break
+		}
+	}
+	for _, postfix := range postfixes {
+		if strings.HasSuffix(api_url, postfix) {
+			api_url = strings.TrimSuffix(api_url, postfix)
+			break
+		}
+	}
+	cmd_array := []string{"discover", "--domains", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
+	cmd := exec.Command("/usr/local/bin/mapi", cmd_array...)
+
+	fullCommand := fmt.Sprintf("mapi %s", strings.Join(cmd_array, " "))
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Command: %s\nFailed with: %s\nError: %s", fullCommand, string(output), err), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "<html><body><h2>Command executed successfully!</h2><pre>%s</pre><a href='/'>Back</a></body></html>", output)
+
+	// List contents of /discovery_results
+	results, err := exec.Command("ls", "-l", "/discovery_results").CombinedOutput()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to list discovery results: %s", err), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "<h3>Discovery Results:</h3><pre>%s</pre>", results)
+
+}
+
+func mapiRun(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -42,7 +93,7 @@ func runMapi(w http.ResponseWriter, r *http.Request) {
 		case "Bearer", "Basic":
 			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("Authorization: %s %s", authType, authValue))
 		case "Cookie":
-			addl_opts = append(addl_opts, "--cookie-auth", fmt.Sprintf("%s", authValue))
+			addl_opts = append(addl_opts, "--cookie-auth", authValue)
 		}
 	}
 
@@ -71,7 +122,8 @@ func runMapi(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/run", runMapi)
+	http.HandleFunc("/run", mapiRun)
+	http.HandleFunc("/discover", mapiDiscover)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -96,3 +96,11 @@ input[type="checkbox"] {
     margin-right: 0.5rem;
     vertical-align: middle;
 }
+
+span {
+    font-size: 0.8em; 
+    display: block; 
+    margin-top: 4px;
+    font-weight: lighter;
+    text-align: right;
+}

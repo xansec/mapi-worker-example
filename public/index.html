@@ -7,34 +7,46 @@
       <body>
         <img src="images/mayhem-logo.png" alt="Logo" class="logo" />
         <div class="container">
-          <h2>Configure Mayhem API Scan</h2>
-          <form method="POST" action="/run">
-            <label>Workspace: <input type="text" name="workspace" required /></label>
-            <label>Project: <input type="text" name="project" required /></label>
-            <label>Target: <input type="text" name="target" required /></label>
-            <label>API URL: <input type="text" name="api_url" required /></label>
-            <label>API Specification: <input type="text" name="api_spec" required /></label>
-            <label>Duration: <input type="text" name="duration" value="auto" /></label>
-            <details>
-              <summary>
-                Additional Options
+          <h2>Unleash Mayhem!</h2>
+          <form method="POST" action="/discover">
+            <label>Enter your API URL: <input type="text" id="api_url" name="api_url" required /></label>
+            
+
+            <button type="submit" class="discover-button">Discover API Endpoints</button>
+            <br/><br/>
+            <details class="start-scan">
+              <summary class="start-summary">
+                Or, Configure your Mayhem Scan<br>
+                <span>(if you already have an API spec)</span>
               </summary>
-              <fieldset>
-                <label><input type="checkbox" name="experimental" value="1" /> Experimental Rules</label>
-                <label><input type="checkbox" name="verify" value="1" /> Verify TLS</label>
-                <label for="auth-type">Authentication Header Type:</label>
-                <select name="auth-type" id="auth-type">
-                  <option value="None">None</option>
-                  <option value="Basic">Basic</option>
-                  <option value="Bearer">Bearer</option>
-                  <option value="Cookie">Cookie</option>
-                </select>
-                <label for="auth-value">Authentication Value:</label>
-                <input type="password" name="auth-value" id="auth-value" />
-              </fieldset>
+              <form method="POST" action="/run">
+              <label>Workspace: <input type="text" name="workspace" required /></label>
+              <label>Project: <input type="text" name="project" required /></label>
+              <label>Target: <input type="text" name="target" required /></label>
+              <label>API URL: <input type="text" name="api_url" required /></label>
+              <label>API Specification: <input type="text" name="api_spec" required /></label>
+              <label>Duration: <input type="text" name="duration" value="auto" /></label>
+              <details>
+                <summary>
+                  Additional Options
+                </summary>
+                <fieldset>
+                  <label><input type="checkbox" name="experimental" value="1" /> Experimental Rules</label>
+                  <label><input type="checkbox" name="verify" value="1" /> Verify TLS</label>
+                  <label for="auth-type">Authentication Header Type:</label>
+                  <select name="auth-type" id="auth-type">
+                    <option value="None">None</option>
+                    <option value="Basic">Basic</option>
+                    <option value="Bearer">Bearer</option>
+                    <option value="Cookie">Cookie</option>
+                  </select>
+                  <label for="auth-value">Authentication Value:</label>
+                  <input type="password" name="auth-value" id="auth-value" />
+                </fieldset>
+              </details>
+              <button type="submit">Run</button>
+            </form>
             </details>
-            <button type="submit">Run</button>
-          </form>
         </div>
       </body>
     </html>
