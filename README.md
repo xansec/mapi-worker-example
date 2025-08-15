@@ -4,7 +4,7 @@ Run API fuzzing natively in the browser with Cloudflare Containers!
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/xansec/mapi-worker-example/)
 
-![Mapi Worker Application Preview](./public/images/mayhem-worker-app.png)
+![Mapi Worker Application Preview](./public/images/mayhem-worker-app.svg)
 
 ## Mayhem for API Worker Example
 This is a Cloudflare Worker application that uses the [Containers](https://developers.cloudflare.com/containers/) feature to run a Mayhem API fuzzing engine directly from your browser, without needing to set up any backend infrastructure.
