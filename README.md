@@ -1,59 +1,49 @@
-# Containers Starter
+# Mapi Cloudflare Container
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/containers-template)
+Run API fuzzing natively in the browser with Cloudflare Containers!
 
-![Containers Template Preview](https://imagedelivery.net/_yJ02hpOMj_EnGvsU2aygw/5aba1fb7-b937-46fd-fa67-138221082200/public)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/xansec/mapi-worker-example/)
 
-<!-- dash-content-start -->
+![Mapi Worker Application Preview](./public/images/mayhem-worker-app.png)
 
-This is a [Container](https://developers.cloudflare.com/containers/) starter template.
+## Mayhem for API Worker Example
+This is a Cloudflare Worker application that uses the [Containers](https://developers.cloudflare.com/containers/) feature to run a Mayhem API fuzzing engine directly from your browser, without needing to set up any backend infrastructure.
 
-It demonstrates basic Container coniguration, launching and routing to individual container, load balancing over multiple container, running basic hooks on container status changes.
+## Prerequisites
 
-<!-- dash-content-end -->
+You'll need a Mayhem API token to use this application. You can get one by signing up for free at [Mayhem](https://app.mayhem.security/).
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+You can set local secrets in a `.env` file in the root of the project. The file should contain your Mayhem API token:
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/containers-template
 ```
+MAYHEM_URL=https://app.mayhem.security
+MAYHEM_TOKEN=<token>
+```
+(You can do this in production by running, for example, `npx wrangler secret put MAYHEM_URL`)
 
-## Getting Started
 
-First, run:
+Then, install dependencies:
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
 ```
 
-Then run the development server (using the package manager of your choice):
+## Running the Application Locally
+
+To run the development server:
 
 ```bash
-npm run dev
+npx wrangler dev --local
 ```
 
-Open [http://localhost:8787](http://localhost:8787) with your browser to see the result.
+Open [http://localhost:8787](http://localhost:8787) with your browser to see the application.
 
-You can start editing your Worker by modifying `src/index.ts` and you can start
-editing your Container by editing the content of `container_src`.
+From here, you can select an API URL and select discover to find endpoints. Once you have an endpoint file (check the terminal output), you can configure your scan parameters and start running Mayhem.
 
 ## Deploying To Production
 
 | Command          | Action                                |
 | :--------------- | :------------------------------------ |
-| `npm run deploy` | Deploy your application to Cloudflare |
+| `npx wrangler deploy` | Deploy your application to Cloudflare |
 
-## Learn More
-
-To learn more about Containers, take a look at the following resources:
-
-- [Container Documentation](https://developers.cloudflare.com/containers/) - learn about Containers
-- [Container Class](https://github.com/cloudflare/containers) - learn about the Container helper class
-
-Your feedback and contributions are welcome!
+You can also deploy to production using the Cloudflare dashboard by clicking the "Deploy to Cloudflare" button at the top of this README.
