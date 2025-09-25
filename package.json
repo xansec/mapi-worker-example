@@ -1,7 +1,7 @@
 {
   "name": "containers",
   "description": "Build a Container-enabled Worker",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -10,13 +10,14 @@
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
-    "@types/node": "^24.1.0",
-    "typescript": "5.8.3",
-    "wrangler": "^4.26.0"
+    "@types/node": "^24.5.2",
+    "typescript": "5.9.2",
+    "wrangler": "^4.40.0"
   },
   "dependencies": {
-    "@cloudflare/containers": "^0.0.19",
-    "hono": "4.8.2"
+    "@cloudflare/containers": "^0.0.28",
+    "hono": "^4.9.8",
+    "workerd": "^1.20250924.0"
   },
   "cloudflare": {
     "label": "Containers Starter",
