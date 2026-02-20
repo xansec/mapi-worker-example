@@ -11,21 +11,49 @@
     <div class="container">
       <h2>Unleash Mayhem!</h2>
 
+      <!-- Cloudflare tunnel -->
+      <details class="ztna_info">
+        <summary>Testing an internal API?</summary>
+        <div class="ztna_callout">
+          <p><strong>Quick tunnel:</strong></p>
+          <p>Simply run</p>
+          <pre>cloudflared tunnel \
+          --url http://localhost:PORT</pre>
+          <p>And paste the generated</p>
+          <code>https://&lt;random&gt;.trycloudflare.com</code> 
+          <p>URL as your API URL.</p>
+          <br/>
+          <details>
+            <summary>Need a more permanent solution?</summary>
+            <p><strong>Cloudflare Access Tunnel:</strong></p>
+            <p>Set up a Cloudflare Tunnel with Access and inject your service token credentials as environment variables.</p>
+            <p>Mayhem will automatically add the necessary headers to authenticate with Cloudflare Access.</p>
+            <fieldset>
+              <label><input type="text" id="cf_access_client_id" />CF_ACCESS_CLIENT_ID</label>
+              <label><input type="password" id="cf_access_client_secret" />CF_ACCESS_CLIENT_SECRET</label>
+            </fieldset>
+            <p>After setting the above two fields, you can either run discover or run below, and Mayhem will inject these secrets.</p>
+          </details>
+        </div>
+      </details>
+
+      <br/>
+
       <!-- mapi discover -->
-      <form id="discover-form" onsubmit="event.preventDefault(); handleDiscover();">
+      <form id="discover_form" onsubmit="event.preventDefault(); handleDiscover();">
         <label>Enter your API URL: <input type="text" id="api_url" name="api_url" required /></label>
-        <button type="submit" class="discover-button">Discover API Endpoints</button>
+        <button type="submit" class="discover_button">Discover API Endpoints</button>
       </form>
 
       <br/><br/>
 
       <!-- mapi run -->
-      <details class="start-scan">
-        <summary class="start-summary">
+      <details class="start_scan">
+        <summary class="start_summary">
           Or, Configure your Mayhem Scan<br>
           <span>(if you already have an API spec)</span>
         </summary>
-        <form id="run-form" onsubmit="event.preventDefault(); handleRun();">
+        <form id="run_form" onsubmit="event.preventDefault(); handleRun();">
           <label>Workspace: <input type="text" name="workspace" required /></label>
           <label>Project: <input type="text" name="project" required /></label>
           <label>Target: <input type="text" name="target" required /></label>
@@ -33,19 +61,22 @@
           <label>API Specification: <input type="text" name="api_spec" required /></label>
           <label>Duration: <input type="text" name="duration" value="auto" /></label>
           <details>
-            <summary>Additional Options</summary>
+            <summary class="additional_options">Additional Options</summary>
             <fieldset>
               <label><input type="checkbox" name="experimental" value="1" /> Experimental Rules</label>
               <label><input type="checkbox" name="verify" value="1" /> Verify TLS</label>
-              <label for="auth-type">Authentication Header Type:</label>
-              <select name="auth-type" id="auth-type">
+              <label><input type="checkbox" name="disable_oauth2" value="1" /> Disable OAuth2</label>
+              <label><input type="checkbox" name="disable_auth_mutations" value="1" /> Disable Auth Header Mutations</label>
+              <label for="auth_type">Authentication Header Type:</label>
+              <select name="auth_type" id="auth_type">
                 <option value="None">None</option>
                 <option value="Basic">Basic</option>
                 <option value="Bearer">Bearer</option>
                 <option value="Cookie">Cookie</option>
+                <option value="Other">Other (specify full header)</option>
               </select>
-              <label for="auth-value">Authentication Value:</label>
-              <input type="password" name="auth-value" id="auth-value" />
+              <label for="auth_value">Authentication Value:</label>
+              <input type="password" name="auth_value" id="auth_value" />
             </fieldset>
           </details>
           <button type="submit">Run Mayhem</button>
@@ -54,12 +85,12 @@
 
       <!-- Terminal Output Container -->
     </div>
-    <div class="terminal-container">
+    <div class="terminal_container">
       <div id="terminal" class="terminal"></div>
     </div>
     <br/><br/>
     <footer>
-      <p>Powered by <a href="https://mayhem.security" target="_blank">Mayhem</a></p>
+      <p>Powered by <a href="https://www.bugcrowd.com/offering/mayhem-security/" target="_blank">Mayhem</a></p>
     </footer>
 
     <script src="scripts/main.js"></script>
