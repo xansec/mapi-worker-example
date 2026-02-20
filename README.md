@@ -1,4 +1,4 @@
-# Mapi Cloudflare Container
+# mAPI Cloudflare Container
 
 Run API fuzzing natively in the browser with Cloudflare Containers!
 
