@@ -30,8 +30,8 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 	cfSecret := strings.TrimSpace(r.FormValue("cf_access_client_secret"))
 	if cfId != "" {
 		if cfSecret != "" {
-			addl_opts = append(addl_opts, "--header-auth", "CF-Access-Client-Id: "+cfId)
-			addl_opts = append(addl_opts, "--header-auth", "CF-Access-Client-Secret: "+cfSecret)
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Id: %s", cfId))
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Secret: %s", cfSecret))
 		}
 	}
 
