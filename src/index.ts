@@ -4,16 +4,18 @@ import { Hono } from "hono";
 export interface Env {
   MAYHEM_URL: string;
   MAYHEM_TOKEN: string;
+  CF_ACCESS_CLIENT_ID: string;
+  CF_ACCESS_CLIENT_SECRET: string;
 }
 
 export class MapiContainer extends Container<Env> {
   defaultPort = 8080;
   sleepAfter = "5m";
-  // Use Cloudflare Worker secrets from the environment
   envVars = {
-    MAYHEM_URL: this.env.MAYHEM_URL, // Ensure your worker has this secret set
-    MAYHEM_TOKEN: this.env.MAYHEM_TOKEN, // Ensure your worker has this secret set
-    // You can add other env vars here as needed
+    MAYHEM_URL: this.env.MAYHEM_URL,
+    MAYHEM_TOKEN: this.env.MAYHEM_TOKEN,
+    CF_ACCESS_CLIENT_ID: this.env.CF_ACCESS_CLIENT_ID,
+    CF_ACCESS_CLIENT_SECRET: this.env.CF_ACCESS_CLIENT_SECRET,
   };
 
   override onStart() {
@@ -42,7 +44,7 @@ function toStringIfFile(val: unknown): string {
 
 app.post("/discover", async (c) => {
   const body = await c.req.parseBody();
-  const { api_url } = body;
+  const { api_url, cf_access_client_id, cf_access_client_secret } = body;
   if (!api_url) {
     return c.text("API URL is missing!", 400);
   }
@@ -55,6 +57,8 @@ app.post("/discover", async (c) => {
     },
     body: new URLSearchParams({
       api_url: toStringIfFile(api_url),
+      cf_access_client_id: toStringIfFile(cf_access_client_id),
+      cf_access_client_secret: toStringIfFile(cf_access_client_secret),
     }),
   });
   return new Response(response.body, {
@@ -64,16 +68,20 @@ app.post("/discover", async (c) => {
 
 app.post("/run", async (c) => {
   const body = await c.req.parseBody();
-  const { workspace, 
-          project, 
-          target, 
-          api_url, 
-          api_spec, 
+  const { workspace,
+          project,
+          target,
+          api_url,
+          api_spec,
           duration,
           experimental,
           verify,
-          "auth-type": authType,
-          "auth-value": authValue } = body;
+          disable_oauth2,
+          disable_auth_mutations,
+          auth_type: authType,
+          auth_value: authValue,
+          cf_access_client_id,
+          cf_access_client_secret } = body;
   if (!workspace || !project || !target || !api_url || !api_spec) {
     return c.text("Some fields are missing!", 400);
   }
@@ -93,8 +101,12 @@ app.post("/run", async (c) => {
       duration: toStringIfFile(duration),
       experimental: toStringIfFile(experimental),
       verify: toStringIfFile(verify),
-      "auth-type": toStringIfFile(authType),
-      "auth-value": toStringIfFile(authValue),
+      disable_oauth2: toStringIfFile(disable_oauth2),
+      disable_auth_mutations: toStringIfFile(disable_auth_mutations),
+      auth_type: toStringIfFile(authType),
+      auth_value: toStringIfFile(authValue),
+      cf_access_client_id: toStringIfFile(cf_access_client_id),
+      cf_access_client_secret: toStringIfFile(cf_access_client_secret),
     }),
   });
   return new Response(response.body, {

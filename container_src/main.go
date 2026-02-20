@@ -25,6 +25,16 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 
 	addl_opts := []string{}
 
+	// Inject Cloudflare Access service token headers when testing Access-protected tunnel URLs
+	cfId:= strings.TrimSpace(r.FormValue("cf_access_client_id"))
+	cfSecret := strings.TrimSpace(r.FormValue("cf_access_client_secret"))
+	if cfId != "" {
+		if cfSecret != "" {
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Id: %s", cfId))
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Secret: %s", cfSecret))
+		}
+	}
+
 	// Strip https:// or http:// from the URL
 	prefixes := []string{"https://", "http://"}
 	postfixes := []string{"/", "/v1", "/v2", "/v3", "/api", "/api/v1", "/api/v2", "/api/v3"}
@@ -41,6 +51,7 @@ func mapiDiscover(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+
 	cmd_array := []string{"--verbosity", "debug", "discover", "--hosts", api_url, "--endpoints-file", "/endpoints.txt", "--output", "/discovery_results"}
 	if len(addl_opts) > 0 {
 		cmd_array = append(cmd_array, addl_opts...)
@@ -80,11 +91,17 @@ func mapiRun(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("verify") == "1" {
 		addl_opts = append(addl_opts, "--verify-tls")
 	}
-	authType := strings.TrimSpace(r.FormValue("auth-type"))
+	if r.FormValue("disable_oauth2") == "1" {
+		addl_opts = append(addl_opts, "--disable-oauth2")
+	}
+	if r.FormValue("disable_auth_mutations") == "1" {
+		addl_opts = append(addl_opts, "--disable-auth-mutations")
+	}
+	authType := strings.TrimSpace(r.FormValue("auth_type"))
 	if authType == "None" {
 		// do nothing
 	} else {
-		authValue := strings.TrimSpace(r.FormValue("auth-value"))
+		authValue := strings.TrimSpace(r.FormValue("auth_value"))
 		if authValue == "" {
 			http.Error(w, "Auth value is required for header authentication", http.StatusBadRequest)
 			return
@@ -93,7 +110,19 @@ func mapiRun(w http.ResponseWriter, r *http.Request) {
 		case "Bearer", "Basic":
 			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("Authorization: %s %s", authType, authValue))
 		case "Cookie":
-			addl_opts = append(addl_opts, "--cookie-auth", authValue)
+			addl_opts = append(addl_opts, "--cookie-auth", fmt.Sprintf("%s", authValue))
+		case "Other":
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("%s", authValue))
+		}
+	}
+
+	// Inject Cloudflare Access service token headers when testing Access-protected tunnel URLs
+	cfId:= strings.TrimSpace(r.FormValue("cf_access_client_id"))
+	cfSecret := strings.TrimSpace(r.FormValue("cf_access_client_secret"))
+	if cfId != "" {
+		if cfSecret != "" {
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Id: %s", cfId))
+			addl_opts = append(addl_opts, "--header-auth", fmt.Sprintf("CF-Access-Client-Secret: %s", cfSecret))
 		}
 	}
 

@@ -13,6 +13,12 @@ function appendToTerminal(text) {
 async function handleFormAction({ formId, endpoint, startMsg, endMsg }) {
   const form = document.getElementById(formId);
   const formData = new FormData(form);
+
+  const cfId = document.getElementById('cf_access_client_id').value;
+  const cfSecret = document.getElementById('cf_access_client_secret').value;
+  if (cfId) formData.append('cf_access_client_id', cfId);
+  if (cfSecret) formData.append('cf_access_client_secret', cfSecret);
+
   appendToTerminal(startMsg);
 
   try {
@@ -37,7 +43,7 @@ async function handleFormAction({ formId, endpoint, startMsg, endMsg }) {
 
 function handleDiscover() {
   handleFormAction({
-    formId: 'discover-form',
+    formId: 'discover_form',
     endpoint: '/discover',
     startMsg: `> Discovering API endpoints for: ${document.getElementById('api_url').value}...`,
     endMsg: 'Discovery completed.'
@@ -46,7 +52,7 @@ function handleDiscover() {
 
 function handleRun() {
   handleFormAction({
-    formId: 'run-form',
+    formId: 'run_form',
     endpoint: '/run',
     startMsg: '> Running Mayhem scan...',
     endMsg: 'Scan completed.'
